@@ -8,7 +8,12 @@ import LLD from './rb/steps/LLD';
 import Build from './rb/steps/Build';
 import Test from './rb/steps/Test';
 import Ship from './rb/steps/Ship';
-import Proof from './rb/proof/Proof';
+import ProofRB from './rb/proof/Proof';
+
+import Home from './pages/Home';
+import Builder from './pages/Builder';
+import Preview from './pages/Preview';
+import Proof from './pages/Proof';
 
 import { ProjectProvider } from './rb/ProjectContext';
 
@@ -17,7 +22,13 @@ function App() {
     <BrowserRouter>
       <ProjectProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/rb/01-problem" replace />} />
+          {/* Core Application Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/builder" element={<Builder />} />
+          <Route path="/preview" element={<Preview />} />
+          <Route path="/proof" element={<Proof />} />
+
+          {/* Educational Track Routes (Preserved) */}
           <Route path="/rb" element={<PremiumLayout />}>
             <Route path="01-problem" element={<Problem />} />
             <Route path="02-market" element={<Market />} />
@@ -27,7 +38,7 @@ function App() {
             <Route path="06-build" element={<Build />} />
             <Route path="07-test" element={<Test />} />
             <Route path="08-ship" element={<Ship />} />
-            <Route path="proof" element={<Proof />} />
+            <Route path="proof" element={<ProofRB />} />
           </Route>
         </Routes>
       </ProjectProvider>
