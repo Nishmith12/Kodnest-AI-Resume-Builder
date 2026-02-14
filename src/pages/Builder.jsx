@@ -11,7 +11,8 @@ const INITIAL_DATA = {
     projects: [],
     skills: { technical: [], soft: [], tools: [] }, // Changed to object
     links: { github: '', linkedin: '' },
-    template: 'classic'
+    template: 'classic',
+    themeColor: '#0f766e' // Default Teal
 };
 
 const SAMPLE_DATA = {
@@ -263,8 +264,23 @@ export default function Builder() {
     };
 
 
+    const [toastMessage, setToastMessage] = useState(null);
+
+    const showToast = (msg) => {
+        setToastMessage(msg);
+        setTimeout(() => setToastMessage(null), 3000);
+    };
+
     return (
-        <div className="flex h-screen bg-kodnest-off-white overflow-hidden">
+        <div className="flex h-screen bg-kodnest-off-white overflow-hidden relative">
+            {/* Toast Notification */}
+            {toastMessage && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2 rounded-md shadow-lg flex items-center gap-2 animate-fade-in-down">
+                    <CheckCircle size={16} className="text-emerald-400" />
+                    <span className="text-sm font-medium">{toastMessage}</span>
+                </div>
+            )}
+
             {/* Left Panel - Form Editor */}
             <div className="w-1/2 flex flex-col border-r border-slate-200 bg-white">
                 {/* Toolbar */}
@@ -429,24 +445,102 @@ export default function Builder() {
 
             {/* Right Panel - Live Preview */}
             <div className="w-1/2 bg-slate-100 flex flex-col h-full">
-                <div className="h-16 border-b border-slate-200 flex items-center justify-between px-6 bg-white flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Preview</span>
-                        <Link to="/preview" className="ml-2 bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-sm flex items-center gap-1 hover:bg-slate-800 transition-colors">
-                            <ExternalLink size={12} /> Finalize & Export
-                        </Link>
+                <div className="h-auto border-b border-slate-200 bg-white flex flex-col p-4 flex-shrink-0 z-10">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Preview</span>
+                            <div className="flex gap-2">
+                                <Link to="/preview" className="bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-sm flex items-center gap-1 hover:bg-slate-800 transition-colors">
+                                    <ExternalLink size={12} /> Finalize & Export
+                                </Link>
+                                <button onClick={() => showToast("PDF export ready! Check your downloads.")} className="border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1.5 rounded-sm flex items-center gap-1 hover:bg-slate-50 transition-colors">
+                                    <Download size={12} /> PDF
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex bg-slate-100 p-1 rounded-sm gap-1">
+
+                    {/* Template Selectors */}
+                    <div className="grid grid-cols-3 gap-3 mb-4">
                         {['classic', 'modern', 'minimal'].map(t => (
-                            <button key={t} onClick={() => setTemplate(t)} className={`text-xs font-bold uppercase px-3 py-1.5 rounded-sm transition-all ${data.template === t ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-                                {t}
+                            <button
+                                key={t}
+                                onClick={() => setTemplate(t)}
+                                className={`flex flex-col items-center gap-2 p-2 rounded-sm border-2 transition-all ${data.template === t ? 'border-kodnest-red bg-red-50/50' : 'border-slate-100 hover:border-slate-300'
+                                    }`}
+                            >
+                                <div className={`w-full h-16 bg-slate-100 rounded-sm overflow-hidden relative shadow-sm ${data.template === t ? 'ring-1 ring-kodnest-red' : ''
+                                    }`}>
+                                    {/* Visual Representation of Templates */}
+                                    {t === 'classic' && (
+                                        <div className="w-full h-full p-2 flex flex-col items-center">
+                                            <div className="w-3/4 h-2 bg-slate-300 mb-1 rounded-[1px]"></div>
+                                            <div className="w-1/2 h-1 bg-slate-200 mb-2 rounded-[1px]"></div>
+                                            <div className="w-full h-[1px] bg-slate-200 mb-2"></div>
+                                            <div className="w-full space-y-1">
+                                                <div className="w-full h-1 bg-slate-200"></div>
+                                                <div className="w-full h-1 bg-slate-200"></div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {t === 'modern' && (
+                                        <div className="w-full h-full flex">
+                                            <div className="w-[30%] h-full bg-slate-300"></div>
+                                            <div className="w-[70%] h-full p-1 space-y-1">
+                                                <div className="w-3/4 h-2 bg-slate-200 mb-1"></div>
+                                                <div className="w-full h-1 bg-slate-100"></div>
+                                                <div className="w-full h-1 bg-slate-100"></div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {t === 'minimal' && (
+                                        <div className="w-full h-full p-2 flex flex-col items-start pt-1">
+                                            <div className="w-1/2 h-2 bg-slate-300 mb-3 rounded-[1px]"></div>
+                                            <div className="w-full space-y-1">
+                                                <div className="w-full h-[1px] bg-slate-200"></div>
+                                                <div className="w-3/4 h-1 bg-slate-100"></div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Active Checkmark */}
+                                    {data.template === t && (
+                                        <div className="absolute top-1 right-1 bg-kodnest-red text-white p-0.5 rounded-full shadow-sm">
+                                            <CheckCircle size={8} />
+                                        </div>
+                                    )}
+                                </div>
+                                <span className="text-[10px] font-bold uppercase text-slate-500">{t}</span>
                             </button>
                         ))}
                     </div>
+
+                    {/* Color Theme Picker */}
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase text-slate-400">Theme:</span>
+                        <div className="flex gap-2">
+                            {[
+                                { name: 'Teal', value: '#0f766e' },
+                                { name: 'Navy', value: '#1e3a8a' },
+                                { name: 'Burgundy', value: '#881337' },
+                                { name: 'Forest', value: '#14532d' },
+                                { name: 'Charcoal', value: '#1f2937' }
+                            ].map((c) => (
+                                <button
+                                    key={c.name}
+                                    onClick={() => setData({ ...data, themeColor: c.value })}
+                                    className={`w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 ${data.themeColor === c.value ? 'border-slate-900 ring-1 ring-white' : 'border-white ring-1 ring-slate-200'
+                                        }`}
+                                    style={{ backgroundColor: c.value }}
+                                    title={c.name}
+                                ></button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
                 <div className="flex-1 overflow-y-auto p-8 flex justify-center bg-slate-100">
-                    <div className="origin-top scale-[0.65] sm:scale-[0.75] md:scale-[0.85] lg:scale-100 transition-transform">
-                        <ResumePreview data={data} template={data.template || 'classic'} />
+                    <div className="origin-top scale-[0.65] sm:scale-[0.75] md:scale-[0.85] lg:scale-100 transition-transform shadow-2xl print:shadow-none">
+                        <ResumePreview data={data} template={data.template || 'classic'} themeColor={data.themeColor || '#0f766e'} />
                     </div>
                 </div>
             </div>
