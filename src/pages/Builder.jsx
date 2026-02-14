@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Layout, Save, Download, RefreshCw, ChevronLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Layout, Save, Download, RefreshCw, ChevronLeft, AlertCircle, CheckCircle, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ResumePreview from '../components/ResumePreview';
 
@@ -48,7 +48,94 @@ const SAMPLE_DATA = {
 
 export default function Builder() {
     const [data, setData] = useState(INITIAL_DATA);
-    const [activeTab, setActiveTab] = useState('personal');
+    const [score, setScore] = useState(0);
+    const [suggestions, setSuggestions] = useState([]);
+
+    // Load from localStorage on mount
+    useEffect(() => {
+        const saved = localStorage.getItem('resumeBuilderData');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                setData(parsed);
+                calculateScore(parsed); // Calculate score immediately on load
+            } catch (e) {
+                console.error("Failed to load resume data", e);
+            }
+        }
+    }, []);
+
+    // Autosave when data changes
+    useEffect(() => {
+        localStorage.setItem('resumeBuilderData', JSON.stringify(data));
+        calculateScore(data);
+    }, [data]);
+
+    const calculateScore = (resumeData) => {
+        let newScore = 0;
+        const newSuggestions = [];
+
+        // 1. Summary Length (40-120 words) (+15)
+        // Guard against empty summary or just whitespace
+        const summaryText = resumeData.summary || "";
+        const summaryWords = summaryText.trim().length > 0 ? summaryText.trim().split(/\s+/).length : 0;
+
+        if (summaryWords >= 40 && summaryWords <= 120) {
+            newScore += 15;
+        } else {
+            newSuggestions.push("Write a stronger summary (40–120 words).");
+        }
+
+        // 2. Projects (At least 2) (+10)
+        if (resumeData.projects && resumeData.projects.length >= 2) {
+            newScore += 10;
+        } else {
+            newSuggestions.push("Add at least 2 projects.");
+        }
+
+        // 3. Experience (At least 1) (+10)
+        if (resumeData.experience && resumeData.experience.length >= 1) {
+            newScore += 10;
+        } else {
+            newSuggestions.push("Add at least 1 work experience.");
+        }
+
+        // 4. Skills (>= 8 items) (+10)
+        if (resumeData.skills && resumeData.skills.length >= 8) {
+            newScore += 10;
+        } else {
+            newSuggestions.push("Add more skills (target 8+).");
+        }
+
+        // 5. Links (GitHub or LinkedIn exists) (+10)
+        if (resumeData.links && (resumeData.links.github || resumeData.links.linkedin)) {
+            newScore += 10;
+        } else {
+            newSuggestions.push("Add GitHub or LinkedIn links.");
+        }
+
+        // 6. Measurable Impact (Numbers in bullets) (+15)
+        // Check experience and projects for numbers
+        const allItems = [...(resumeData.experience || []), ...(resumeData.projects || [])];
+        const hasNumbers = allItems.some(item =>
+            /\d(%|k|\+|X)|(\$|€|£)\d/.test(item.description || "") || /\d+/.test(item.description || "")
+        );
+        if (hasNumbers) {
+            newScore += 15;
+        } else {
+            newSuggestions.push("Add measurable impact (numbers) in bullets.");
+        }
+
+        // 7. Complete Education (+10)
+        const hasEducation = resumeData.education && resumeData.education.length > 0 && resumeData.education.every(e => e.degree && e.institution && e.year);
+        if (hasEducation) {
+            newScore += 10;
+        }
+
+        // Cap at 100
+        setScore(Math.min(100, newScore));
+        setSuggestions(newSuggestions.slice(0, 3)); // Top 3
+    };
 
     const loadSampleData = () => {
         setData(SAMPLE_DATA);
@@ -116,6 +203,43 @@ export default function Builder() {
                 {/* Scrollable Form Area */}
                 <div className="flex-1 overflow-y-auto p-8 space-y-8">
 
+                    {/* ATS Score Panel */}
+                    <div className="bg-slate-50 border border-slate-200 rounded-sm p-4 mb-6">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <TrendingUp size={18} className="text-kodnest-red" />
+                                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">ATS Readiness Score</h2>
+                            </div>
+                            <span className={`text-2xl font-bold font-serif ${score >= 80 ? 'text-emerald-600' : score >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                                {score}/100
+                            </span>
+                        </div>
+
+                        {/* Score Bar */}
+                        <div className="w-full bg-slate-200 h-2 rounded-full mb-4">
+                            <div
+                                className={`h-2 rounded-full transition-all duration-1000 ${score >= 80 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                                style={{ width: `${score}%` }}
+                            ></div>
+                        </div>
+
+                        {/* Suggestions */}
+                        {suggestions.length > 0 ? (
+                            <div className="space-y-2">
+                                {suggestions.map((suggestion, idx) => (
+                                    <div key={idx} className="flex items-start gap-2 text-xs text-slate-600">
+                                        <AlertCircle size={12} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                                        <span>{suggestion}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 text-xs text-emerald-600 font-medium">
+                                <CheckCircle size={14} /> Great job! Your resume looks strong.
+                            </div>
+                        )}
+                    </div>
+
                     <section className="space-y-4">
                         <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 border-b border-slate-100 pb-2">Personal Info</h2>
                         <div className="grid grid-cols-2 gap-4">
@@ -136,6 +260,7 @@ export default function Builder() {
                             placeholder="Write a brief professional summary..."
                             className="w-full h-32 p-3 border border-slate-200 rounded-sm focus:border-kodnest-red outline-none text-sm resize-none"
                         ></textarea>
+                        <p className="text-xs text-slate-400 text-right">{data.summary.split(/\s+/).filter(w => w.length > 0).length} words</p>
                     </section>
 
                     <section className="space-y-4">
@@ -181,6 +306,7 @@ export default function Builder() {
                             placeholder="Comma separated skills (e.g. React, Node.js, Design)"
                             className="w-full h-20 p-3 border border-slate-200 rounded-sm focus:border-kodnest-red outline-none text-sm resize-none"
                         ></textarea>
+                        <p className="text-xs text-slate-400 text-right">{data.skills.filter(s => s.trim().length > 0).length} skills</p>
                     </section>
                 </div>
             </div>
