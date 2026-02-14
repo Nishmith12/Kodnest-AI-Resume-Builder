@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-kodnest-off-white: #F7F6F3;
+  --color-kodnest-red: #8B0000;
+  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+body {
+  background-color: var(--color-kodnest-off-white);
+  color: #0f172a;
+  /* slate-900 */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+  letter-spacing: 0.05em;
+  /* Generous spacing */
+}
