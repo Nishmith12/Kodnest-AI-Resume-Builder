@@ -1,38 +1,67 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Github, Linkedin, ExternalLink } from 'lucide-react';
 
-export default function ResumePreview({ data }) {
+export default function ResumePreview({ data, template = 'classic' }) {
+    if (!data) return null;
     const { personal, summary, experience, education, projects, skills, links } = data;
 
+    // Classic: Serif headings, centered header, traditional look (default)
+    const isClassic = template === 'classic';
+    // Modern: Sans-serif headings, left-aligned, clean lines
+    const isModern = template === 'modern';
+    // Minimal: Airy, smaller type, no lines, very simple
+    const isMinimal = template === 'minimal';
+
+    const containerClass = `bg-white text-slate-900 font-sans p-10 max-w-[210mm] mx-auto min-h-[297mm] shadow-sm ${isClassic ? 'font-serif' : 'font-sans'
+        }`;
+
+    const headerClass = `mb-8 ${isClassic ? 'text-center border-b-2 border-slate-900 pb-6' :
+            isModern ? 'text-left border-b border-slate-300 pb-6' :
+                'text-left pb-4' // Minimal
+        }`;
+
+    const nameClass = `font-bold text-slate-900 mb-2 uppercase tracking-tight ${isClassic ? 'text-4xl' :
+            isModern ? 'text-5xl tracking-tighter' :
+                'text-3xl font-normal tracking-wide' // Minimal
+        }`;
+
+    const contactContainerClass = `flex flex-wrap gap-4 text-sm text-slate-600 font-medium tracking-wide ${isClassic ? 'justify-center' : 'justify-start'
+        }`;
+
+    const sectionTitleClass = `text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 ${isClassic ? 'border-b border-slate-200 pb-1 text-center' :
+            isModern ? 'text-kodnest-red border-l-4 border-kodnest-red pl-3' :
+                'text-slate-400 mb-2' // Minimal
+        }`;
+
     return (
-        <div className="bg-white text-slate-900 font-sans p-10 max-w-[210mm] mx-auto min-h-[297mm] shadow-sm">
+        <div className={containerClass}>
             {/* Header */}
-            <header className="border-b-2 border-slate-900 pb-6 mb-8">
-                <h1 className="text-4xl font-serif font-bold tracking-tight text-slate-900 uppercase mb-2">
-                    {personal.name || "Your Name"}
+            <header className={headerClass}>
+                <h1 className={nameClass}>
+                    {personal?.name || "Your Name"}
                 </h1>
-                <div className="flex flex-wrap gap-4 text-sm text-slate-600 font-medium tracking-wide">
-                    {personal.email && (
+                <div className={contactContainerClass}>
+                    {personal?.email && (
                         <div className="flex items-center gap-1">
                             <Mail size={14} /> {personal.email}
                         </div>
                     )}
-                    {personal.phone && (
+                    {personal?.phone && (
                         <div className="flex items-center gap-1">
                             <Phone size={14} /> {personal.phone}
                         </div>
                     )}
-                    {personal.location && (
+                    {personal?.location && (
                         <div className="flex items-center gap-1">
                             <MapPin size={14} /> {personal.location}
                         </div>
                     )}
-                    {links.github && (
+                    {links?.github && (
                         <div className="flex items-center gap-1">
                             <Github size={14} /> {links.github}
                         </div>
                     )}
-                    {links.linkedin && (
+                    {links?.linkedin && (
                         <div className="flex items-center gap-1">
                             <Linkedin size={14} /> {links.linkedin}
                         </div>
@@ -43,7 +72,7 @@ export default function ResumePreview({ data }) {
             {/* Summary */}
             {summary && (
                 <section className="mb-8">
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-3 border-b border-slate-200 pb-1">
+                    <h2 className={sectionTitleClass}>
                         Professional Summary
                     </h2>
                     <p className="text-slate-800 leading-relaxed text-sm">
@@ -53,16 +82,16 @@ export default function ResumePreview({ data }) {
             )}
 
             {/* Experience */}
-            {experience.length > 0 && (
+            {experience && experience.length > 0 && (
                 <section className="mb-8">
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 border-b border-slate-200 pb-1">
+                    <h2 className={sectionTitleClass}>
                         Experience
                     </h2>
                     <div className="space-y-6">
                         {experience.map((exp, idx) => (
-                            <div key={idx}>
+                            <div key={idx} className={isMinimal ? "mb-6" : ""}>
                                 <div className="flex justify-between items-baseline mb-1">
-                                    <h3 className="font-bold text-slate-900 text-lg">{exp.role}</h3>
+                                    <h3 className={`font-bold text-slate-900 ${isModern ? 'text-lg' : 'text-base'}`}>{exp.role}</h3>
                                     <span className="text-xs font-mono text-slate-500">{exp.duration}</span>
                                 </div>
                                 <div className="text-sm font-medium text-slate-700 mb-2">{exp.company}</div>
@@ -76,16 +105,16 @@ export default function ResumePreview({ data }) {
             )}
 
             {/* Projects */}
-            {projects.length > 0 && (
+            {projects && projects.length > 0 && (
                 <section className="mb-8">
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 border-b border-slate-200 pb-1">
+                    <h2 className={sectionTitleClass}>
                         Projects
                     </h2>
                     <div className="space-y-5">
                         {projects.map((proj, idx) => (
-                            <div key={idx}>
+                            <div key={idx} className={isMinimal ? "mb-6" : ""}>
                                 <div className="flex justify-between items-baseline mb-1">
-                                    <h3 className="font-bold text-slate-900">{proj.name}</h3>
+                                    <h3 className={`font-bold text-slate-900 ${isModern ? 'text-lg' : 'text-base'}`}>{proj.name}</h3>
                                     {proj.link && (
                                         <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-xs text-kodnest-red flex items-center gap-1 hover:underline">
                                             View Project <ExternalLink size={10} />
@@ -102,9 +131,9 @@ export default function ResumePreview({ data }) {
             )}
 
             {/* Education */}
-            {education.length > 0 && (
+            {education && education.length > 0 && (
                 <section className="mb-8">
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 border-b border-slate-200 pb-1">
+                    <h2 className={sectionTitleClass}>
                         Education
                     </h2>
                     <div className="space-y-4">
@@ -122,14 +151,17 @@ export default function ResumePreview({ data }) {
             )}
 
             {/* Skills */}
-            {skills.length > 0 && (
+            {skills && skills.length > 0 && (
                 <section>
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-3 border-b border-slate-200 pb-1">
+                    <h2 className={sectionTitleClass}>
                         Skills
                     </h2>
-                    <div className="flex flex-wrap gap-2">
+                    <div className={`flex flex-wrap gap-2 ${isMinimal ? '' : ''}`}>
                         {skills.map((skill, idx) => (
-                            <span key={idx} className="bg-slate-100 text-slate-700 px-2 py-1 rounded-sm text-xs font-medium border border-slate-200">
+                            <span key={idx} className={`text-sm ${isModern ? 'bg-slate-100 px-2 py-1 rounded-sm text-slate-700 font-medium' :
+                                    isMinimal ? 'text-slate-600 border-r border-slate-300 pr-2 last:border-0' :
+                                        'bg-white border border-slate-200 px-2 py-1 rounded-sm text-slate-700'
+                                }`}>
                                 {skill.trim()}
                             </span>
                         ))}
