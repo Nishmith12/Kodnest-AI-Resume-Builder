@@ -117,45 +117,66 @@ export default function Builder() {
         let newScore = 0;
         const newSuggestions = [];
 
-        // 1. Summary Length (+15)
-        const summaryText = resumeData.summary || "";
-        const summaryWords = summaryText.trim().length > 0 ? summaryText.trim().split(/\s+/).length : 0;
-        if (summaryWords >= 40 && summaryWords <= 120) newScore += 15;
-        else if (summaryWords < 40) newSuggestions.push("Expand summary (target 40–120 words).");
-        else newSuggestions.push("Shorten summary (target 40–120 words).");
+        // 1. Personal Info (Total: 35)
+        if (resumeData.personal.name) newScore += 10;
+        else newSuggestions.push("Add your full name (+10)");
 
-        // 2. Projects (+10)
-        if (resumeData.projects && resumeData.projects.length >= 2) newScore += 10;
-        else newSuggestions.push("Add at least 2 projects.");
+        if (resumeData.personal.email) newScore += 10;
+        else newSuggestions.push("Add your email address (+10)");
 
-        // 3. Experience (+10)
-        if (resumeData.experience && resumeData.experience.length >= 1) newScore += 10;
-        else newSuggestions.push("Add at least 1 work experience.");
+        if (resumeData.personal.phone) newScore += 5;
+        else newSuggestions.push("Add phone number (+5)");
 
-        // 4. Skills (+10) - Count all categories
+        if (resumeData.links.linkedin) newScore += 5;
+        else newSuggestions.push("Add LinkedIn profile (+5)");
+
+        if (resumeData.links.github) newScore += 5;
+        else newSuggestions.push("Add GitHub profile (+5)");
+
+        // 2. Summary (Total: 20)
+        const summary = resumeData.summary || "";
+        if (summary.length > 50) newScore += 10;
+        else newSuggestions.push("Expand summary (> 50 chars) (+10)");
+
+        const hasActionVerbs = ACTION_VERBS.some(verb =>
+            summary.toLowerCase().includes(verb.toLowerCase())
+        );
+        if (hasActionVerbs) newScore += 10;
+        else newSuggestions.push("Use action verbs in summary (e.g. Built, Led) (+10)");
+
+        // 3. Experience (Total: 15)
+        if (resumeData.experience && resumeData.experience.length >= 1) newScore += 15;
+        else newSuggestions.push("Add at least 1 work experience (+15)");
+
+        // 4. Education (Total: 10)
+        if (resumeData.education && resumeData.education.length >= 1) newScore += 10;
+        else newSuggestions.push("Add education details (+10)");
+
+        // 5. Skills (Total: 10)
         const totalSkills = (resumeData.skills.technical?.length || 0) +
             (resumeData.skills.soft?.length || 0) +
             (resumeData.skills.tools?.length || 0);
-        if (totalSkills >= 8) newScore += 10;
-        else newSuggestions.push("Add more skills (target 8+ total).");
+        if (totalSkills >= 5) newScore += 10;
+        else newSuggestions.push("Add at least 5 skills (+10)");
 
-        // 5. Links (+10)
-        if (resumeData.links && (resumeData.links.github || resumeData.links.linkedin)) newScore += 10;
-        else newSuggestions.push("Add GitHub or LinkedIn links.");
-
-        // 6. Impact (+15)
-        const allItems = [...(resumeData.experience || []), ...(resumeData.projects || [])];
-        const hasNumbers = allItems.some(item =>
-            /\d(%|k|\+|X)|(\$|€|£)\d/.test(item.description || "") || /\d+/.test(item.description || "")
-        );
-        if (hasNumbers) newScore += 15;
-        else newSuggestions.push("Add measurable impact (numbers) in bullets.");
-
-        // 7. Education (+10)
-        if (resumeData.education?.length > 0 && resumeData.education.every(e => e.degree && e.institution && e.year)) newScore += 10;
+        // 6. Projects (Total: 10)
+        if (resumeData.projects && resumeData.projects.length >= 1) newScore += 10;
+        else newSuggestions.push("Add at least 1 project (+10)");
 
         setScore(Math.min(100, newScore));
-        setSuggestions(newSuggestions.slice(0, 3));
+        setSuggestions(newSuggestions);
+    };
+
+    const getScoreColor = (s) => {
+        if (s <= 40) return 'text-red-500';
+        if (s <= 70) return 'text-amber-500';
+        return 'text-emerald-500';
+    };
+
+    const getScoreLabel = (s) => {
+        if (s <= 40) return 'Needs Work';
+        if (s <= 70) return 'Getting There';
+        return 'Strong Resume';
     };
 
     const getBulletGuidance = (text) => {
@@ -272,7 +293,7 @@ export default function Builder() {
     };
 
     return (
-        <div className="flex h-screen bg-kodnest-off-white overflow-hidden relative">
+        <div className="flex flex-col lg:flex-row h-screen bg-kodnest-off-white overflow-hidden relative">
             {/* Toast Notification */}
             {toastMessage && (
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2 rounded-md shadow-lg flex items-center gap-2 animate-fade-in-down">
@@ -282,7 +303,7 @@ export default function Builder() {
             )}
 
             {/* Left Panel - Form Editor */}
-            <div className="w-1/2 flex flex-col border-r border-slate-200 bg-white">
+            <div className="w-full lg:w-1/2 flex flex-col border-r-0 lg:border-r border-slate-200 bg-white h-1/2 lg:h-full">
                 {/* Toolbar */}
                 <div className="h-16 border-b border-slate-200 flex items-center justify-between px-6 bg-white flex-shrink-0">
                     <div className="flex items-center gap-4">
@@ -297,31 +318,55 @@ export default function Builder() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                    {/* Score Panel */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-sm p-4 mb-6 relative overflow-hidden">
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                                <TrendingUp size={18} className="text-kodnest-red" />
-                                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">ATS Readiness Score</h2>
+                    {/* Score Panel - Circular */}
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 mb-6">
+                        <div className="flex items-center gap-6">
+                            {/* Circular Progress */}
+                            <div className="relative w-20 h-20 flex-shrink-0">
+                                <svg className="w-full h-full transform -rotate-90">
+                                    <circle
+                                        cx="40" cy="40" r="36"
+                                        stroke="currentColor" strokeWidth="8" fill="transparent"
+                                        className="text-slate-200"
+                                    />
+                                    <circle
+                                        cx="40" cy="40" r="36"
+                                        stroke="currentColor" strokeWidth="8" fill="transparent"
+                                        strokeDasharray={36 * 2 * Math.PI}
+                                        strokeDashoffset={36 * 2 * Math.PI - (score / 100) * (36 * 2 * Math.PI)}
+                                        className={`transition-all duration-1000 ease-out ${getScoreColor(score)}`}
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center flex-col">
+                                    <span className={`text-xl font-bold ${getScoreColor(score)}`}>{score}</span>
+                                </div>
                             </div>
-                            <span className={`text-3xl font-bold font-serif ${score >= 80 ? 'text-emerald-600' : score >= 50 ? 'text-amber-600' : 'text-red-600'}`}>{score}</span>
-                        </div>
-                        <div className="w-full bg-slate-200 h-2 rounded-full mb-4">
-                            <div className={`h-2 rounded-full transition-all duration-1000 ${score >= 80 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${score}%` }}></div>
-                        </div>
-                        {suggestions.length > 0 ? (
-                            <div className="space-y-3 pt-2">
-                                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Top Improvements</h3>
-                                {suggestions.map((s, i) => (
-                                    <div key={i} className="flex items-start gap-2 text-xs text-slate-700 bg-white p-2 border border-slate-100 rounded-sm shadow-sm">
-                                        <AlertCircle size={14} className="text-amber-500 mt-0.5 flex-shrink-0" />
-                                        <span className="font-medium">{s}</span>
+
+                            <div className="flex-1">
+                                <h2 className={`text-lg font-bold mb-1 ${getScoreColor(score)}`}>{getScoreLabel(score)}</h2>
+                                <p className="text-sm text-slate-500 mb-2">ATS Readiness Score</p>
+                                {suggestions.length > 0 ? (
+                                    <div className="text-xs text-slate-600 bg-white p-2 rounded border border-slate-100 shadow-sm">
+                                        <div className="font-bold text-slate-700 mb-1 flex items-center gap-1">
+                                            <TrendingUp size={12} /> Improve Score:
+                                        </div>
+                                        <ul className="space-y-1 pl-1">
+                                            {suggestions.slice(0, 3).map((s, i) => (
+                                                <li key={i} className="flex items-center gap-1.5">
+                                                    <span className="w-1 h-1 rounded-full bg-kodnest-red flex-shrink-0"></span>
+                                                    {s}
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
-                                ))}
+                                ) : (
+                                    <div className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                                        <CheckCircle size={14} /> Perfect Score!
+                                    </div>
+                                )}
                             </div>
-                        ) : (
-                            <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium pt-2"><CheckCircle size={16} /> All systems go!</div>
-                        )}
+                        </div>
                     </div>
 
                     {/* Personal Info */}
