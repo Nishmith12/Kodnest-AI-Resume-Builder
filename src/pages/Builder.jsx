@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Save, Download, RefreshCw, ChevronLeft, AlertCircle, CheckCircle, TrendingUp, Info } from 'lucide-react';
+import { Layout, Save, Download, RefreshCw, ChevronLeft, AlertCircle, CheckCircle, TrendingUp, Info, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ResumePreview from '../components/ResumePreview';
 
@@ -373,6 +373,9 @@ export default function Builder() {
                 <div className="h-16 border-b border-slate-200 flex items-center justify-between px-6 bg-white flex-shrink-0">
                     <div className="flex items-center gap-3">
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Preview</span>
+                        <Link to="/preview" className="ml-2 bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-sm flex items-center gap-1 hover:bg-slate-800 transition-colors">
+                            <ExternalLink size={12} /> Finalize & Export
+                        </Link>
                     </div>
                     <div className="flex bg-slate-100 p-1 rounded-sm gap-1">
                         {['classic', 'modern', 'minimal'].map(t => (
@@ -380,8 +383,8 @@ export default function Builder() {
                                 key={t}
                                 onClick={() => setTemplate(t)}
                                 className={`text-xs font-bold uppercase px-3 py-1.5 rounded-sm transition-all ${data.template === t
-                                        ? 'bg-white text-slate-900 shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700'
+                                    ? 'bg-white text-slate-900 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700'
                                     }`}
                             >
                                 {t}

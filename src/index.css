@@ -1,15 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @import "tailwindcss";
 
 @theme {
   --color-kodnest-off-white: #F7F6F3;
   --color-kodnest-red: #8B0000;
   --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: Inter, sans-serif;
 }
 
 body {
   background-color: var(--color-kodnest-off-white);
   color: #0f172a;
   /* slate-900 */
+  font-family: var(--font-sans);
 }
 
 h1,
@@ -19,6 +23,77 @@ h4,
 h5,
 h6 {
   font-family: var(--font-serif);
-  letter-spacing: 0.05em;
-  /* Generous spacing */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Print Styles */
+@media print {
+  @page {
+    margin: 0;
+    size: auto;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Hide UI elements */
+  nav,
+  button,
+  header div[class*="toolbar"],
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure resume text is black */
+  .text-slate-500,
+  .text-slate-600,
+  .text-slate-700,
+  .text-slate-900 {
+    color: black !important;
+  }
+
+  /* Reset container widths for print */
+  div[class*="min-h-screen"] {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Target the resume container specifically */
+  div[class*="max-w-[210mm]"] {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    padding: 20mm !important;
+    /* Standard print margin */
+    margin: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* Prevent awkward breaks */
+  section {
+    break-inside: avoid;
+  }
 }

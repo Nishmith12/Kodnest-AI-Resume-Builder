@@ -12,6 +12,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
     // Minimal: Airy, smaller type, no lines, very simple
     const isMinimal = template === 'minimal';
 
+    // Added print:shadow-none print:p-0 etc. handled by global CSS, but keeping semantic classes here
     const containerClass = `bg-white text-slate-900 font-sans p-10 max-w-[210mm] mx-auto min-h-[297mm] shadow-sm ${isClassic ? 'font-serif' : 'font-sans'
         }`;
 
@@ -34,7 +35,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
         }`;
 
     return (
-        <div className={containerClass}>
+        <div className={containerClass} id="resume-preview-node">
             {/* Header */}
             <header className={headerClass}>
                 <h1 className={nameClass}>
@@ -71,11 +72,11 @@ export default function ResumePreview({ data, template = 'classic' }) {
 
             {/* Summary */}
             {summary && (
-                <section className="mb-8">
+                <section className="mb-8 break-inside-avoid">
                     <h2 className={sectionTitleClass}>
                         Professional Summary
                     </h2>
-                    <p className="text-slate-800 leading-relaxed text-sm">
+                    <p className="text-slate-800 leading-relaxed text-sm text-justify">
                         {summary}
                     </p>
                 </section>
@@ -89,13 +90,13 @@ export default function ResumePreview({ data, template = 'classic' }) {
                     </h2>
                     <div className="space-y-6">
                         {experience.map((exp, idx) => (
-                            <div key={idx} className={isMinimal ? "mb-6" : ""}>
+                            <div key={idx} className={`break-inside-avoid ${isMinimal ? "mb-6" : ""}`}>
                                 <div className="flex justify-between items-baseline mb-1">
                                     <h3 className={`font-bold text-slate-900 ${isModern ? 'text-lg' : 'text-base'}`}>{exp.role}</h3>
                                     <span className="text-xs font-mono text-slate-500">{exp.duration}</span>
                                 </div>
                                 <div className="text-sm font-medium text-slate-700 mb-2">{exp.company}</div>
-                                <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                                <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line text-justify">
                                     {exp.description}
                                 </p>
                             </div>
@@ -112,7 +113,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
                     </h2>
                     <div className="space-y-5">
                         {projects.map((proj, idx) => (
-                            <div key={idx} className={isMinimal ? "mb-6" : ""}>
+                            <div key={idx} className={`break-inside-avoid ${isMinimal ? "mb-6" : ""}`}>
                                 <div className="flex justify-between items-baseline mb-1">
                                     <h3 className={`font-bold text-slate-900 ${isModern ? 'text-lg' : 'text-base'}`}>{proj.name}</h3>
                                     {proj.link && (
@@ -121,7 +122,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
                                         </a>
                                     )}
                                 </div>
-                                <p className="text-sm text-slate-600 leading-relaxed">
+                                <p className="text-sm text-slate-600 leading-relaxed text-justify">
                                     {proj.description}
                                 </p>
                             </div>
@@ -132,7 +133,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
 
             {/* Education */}
             {education && education.length > 0 && (
-                <section className="mb-8">
+                <section className="mb-8 break-inside-avoid">
                     <h2 className={sectionTitleClass}>
                         Education
                     </h2>
@@ -152,7 +153,7 @@ export default function ResumePreview({ data, template = 'classic' }) {
 
             {/* Skills */}
             {skills && skills.length > 0 && (
-                <section>
+                <section className="break-inside-avoid">
                     <h2 className={sectionTitleClass}>
                         Skills
                     </h2>
